@@ -1,0 +1,20 @@
+--------------------------------------------------------
+--  Arquivo criado - terça-feira-setembro-20-2022   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for View VW_TOP_PURCHASES
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "STFDEV"."VW_TOP_PURCHASES" ("CLIENTE", "CIDADE", "UF", "PEDIDOS", "MÉDIA POR PEDIDO", "TOTAL R$", "LOJA FAVORITA") AS 
+  SELECT C.FULL_NAME AS CLIENTE, A.LOCALIDADE AS CIDADE, A.UF AS UF, COUNT(O.ID) AS PEDIDOS,
+TO_CHAR((SUM(O.TOTAL) / COUNT(O.ID)), '999D00') AS "MÉDIA POR PEDIDO",
+TO_CHAR(SUM(O.TOTAL), '9999D00') AS "TOTAL R$",
+FS."LOJA FAVORITA"
+FROM VW_FAVORITE_STORE FS 
+INNER JOIN ORDERS O ON O.CUSTOMER_ID = FS.CUSTOMER_ID 
+INNER JOIN CUSTOMERS C ON C.ID = O.CUSTOMER_ID
+INNER JOIN ADDRESSES A ON A.CUSTOMER_ID = C.ID 
+WHERE O.STATUS = 'FINALIZADO' AND A.DEFAULT_ADDRESS = 1 
+GROUP BY C.FULL_NAME, A.LOCALIDADE, A.UF, FS."LOJA FAVORITA" 
+ORDER BY SUM(O.TOTAL) DESC
+;

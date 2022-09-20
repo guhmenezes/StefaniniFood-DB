@@ -1,0 +1,19 @@
+--------------------------------------------------------
+--  Arquivo criado - terça-feira-setembro-20-2022   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for View VW_SALES_LAST_30_DAYS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "STFDEV"."VW_SALES_LAST_30_DAYS" ("EMPRESA", "CIDADE", "UF", "PEDIDOS", "MÉDIA POR PEDIDO", "TOTAL VENDIDO R$", "DE", "ATE") AS 
+  SELECT C.COMPANY_NAME AS EMPRESA, L.CITY AS CIDADE, L.L_STATE AS UF, COUNT(O.ID) AS PEDIDOS,
+TO_CHAR((SUM(O.TOTAL) / COUNT(O.ID)), '999D00') AS "MÉDIA POR PEDIDO",
+TO_CHAR(SUM(O.TOTAL), '9999D00') AS "TOTAL VENDIDO R$", SYSDATE - 30 AS DE, SYSDATE AS ATE 
+FROM ORDERS O 
+INNER JOIN MOTOBOYS M ON M.ID = O.MOTOBOY_ID 
+INNER JOIN COMPANIES C ON C.ID = M.COMPANY_ID 
+INNER JOIN LOCALIZATIONS L ON L.COMPANY_ID = C.ID 
+WHERE O.STATUS = 'FINALIZADO' AND O.ORDERED_AT > SYSDATE -30 AND L.COMPANY_ID = C.ID 
+GROUP BY C.COMPANY_NAME, L.CITY, L.L_STATE 
+ORDER BY SUM(O.TOTAL) DESC
+;
